@@ -1,2 +1,3 @@
-# shorten-url-rust
+# Shorten URL Service
+
 A tiny service to shorten URLs
