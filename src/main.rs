@@ -1,7 +1,13 @@
 use std::env;
 
-use axum::{Router, routing::get};
+use axum::{
+    Router,
+    routing::{get, post},
+};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+
+use crate::shortener::shortener_handler;
+mod shortener;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -29,5 +35,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn get_router() -> Router {
-    Router::new().route("/", get(|| async { "hello world!" }))
+    Router::new()
+        .route("/", get(|| async { "hello world!" }))
+        .route("/shorten", post(shortener_handler))
 }
