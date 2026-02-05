@@ -22,6 +22,8 @@ pub async fn shortener_handler(
 }
 
 fn shorten(url: &str) -> String {
-    // Implementation of URL shortening logic
-    url.to_string()
+    use std::hash::{DefaultHasher, Hash, Hasher};
+    let mut hasher = DefaultHasher::new();
+    url.hash(&mut hasher);
+    hasher.finish().to_string()
 }
