@@ -4,7 +4,7 @@ use axum::{
     Extension, Router,
     routing::{get, post},
 };
-use sqlx::postgres::PgPoolOptions;
+use sqlx::{migrate::MigrateDatabase, postgres::PgPoolOptions};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::shortener::shortener_handler;
@@ -65,8 +65,19 @@ async fn app_state() -> Result<AppState, Box<dyn std::error::Error>> {
 }
 
 async fn connect_to_database() -> Result<sqlx::PgPool, sqlx::Error> {
-    let database_url = env::var("DATABASE_URL")
-        .unwrap_or_else(|_| "postgres://postgres:thePassWord@localhost:5432/postgres".to_string());
+    let database_url = env::var("DATABASE_URL").unwrap_or_else(|_| {
+        "postgres://postgres:thePassWord@localhost:5432/shorten_url".to_string()
+    });
+
+    // ensure database
+    let db_exists = sqlx::Postgres::database_exists(&database_url).await?;
+    tracing::debug!("db_exists: {}", db_exists);
+    if !db_exists {
+        tracing::debug!("creating database ...");
+        sqlx::Postgres::create_database(&database_url).await?;
+    }
+
+    // establish the pool connection
     PgPoolOptions::new()
         .max_connections(5)
         .connect(&database_url)
