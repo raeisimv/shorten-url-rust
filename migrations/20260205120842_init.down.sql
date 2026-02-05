@@ -1,2 +1,2 @@
 -- Add down migration script here
-drop table urls;
+drop table if exists urls;
