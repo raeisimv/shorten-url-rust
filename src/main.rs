@@ -1,10 +1,10 @@
 use std::{env, path::Path};
 
 use axum::{
-    Extension, Router,
+    Router,
     routing::{get, post},
 };
-use sqlx::{Pool, migrate::MigrateDatabase, postgres::PgPoolOptions};
+use sqlx::{migrate::MigrateDatabase, postgres::PgPoolOptions};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::shortener::shortener_handler;
@@ -84,7 +84,7 @@ async fn connect_to_database() -> Result<sqlx::PgPool, sqlx::Error> {
         .await?;
 
     // get migrations directory
-    let migrations_dir = if (env::var("RUST_ENV") == Ok("production".to_string())) {
+    let migrations_dir = if env::var("RUST_ENV") == Ok("production".to_string()) {
         std::env::current_exe()?.join("./migrations")
     } else {
         let manifest_dir =
