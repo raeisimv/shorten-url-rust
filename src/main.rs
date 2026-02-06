@@ -7,6 +7,7 @@ use axum::{
 use sqlx::{migrate::MigrateDatabase, postgres::PgPoolOptions};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
+mod navigator;
 mod shortener;
 
 #[tokio::main]
@@ -41,6 +42,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 async fn get_router() -> Result<Router, Box<dyn std::error::Error>> {
+    use crate::navigator::navigator_handler;
     use crate::shortener::shortener_handler;
 
     tracing::debug!("initializing the database...");
@@ -49,6 +51,7 @@ async fn get_router() -> Result<Router, Box<dyn std::error::Error>> {
 
     let app: Router = Router::new()
         .route("/", get(|| async { "hello world!" }))
+        .route("/{code}", get(navigator_handler))
         .route("/shorten", post(shortener_handler))
         .with_state(app_state);
 
