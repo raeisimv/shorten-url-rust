@@ -30,13 +30,13 @@ pub async fn shortener_handler(
     State(state): State<Arc<AppState>>,
     Json(input): Json<ShortenerRequest>,
 ) -> Result<Json<ShortenerResponse>, (StatusCode, String)> {
-    let shorten_url = shorten(&input.url);
+    let shorten_url = gen_shorten_code(&input.url);
 
     let response = ShortenerResponse { url: shorten_url };
     Ok(Json(response))
 }
 
-fn shorten(url: &str) -> String {
+fn gen_shorten_code(url: &str) -> String {
     use std::hash::{DefaultHasher, Hash, Hasher};
     let mut hasher = DefaultHasher::new();
     url.hash(&mut hasher);
