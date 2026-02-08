@@ -32,7 +32,26 @@ pub async fn shortener_handler(
 ) -> Result<Json<ShortenerResponse>, (StatusCode, String)> {
     let shorten_url = gen_shorten_code(&input.url);
 
-    let response = ShortenerResponse { url: shorten_url };
+    // make it as short as possible
+    let mut shortest = None;
+    for i in 3..shorten_url.len() {
+        let candidate = shorten_url[..i].to_string();
+        let record = sqlx::query!(r#"select id from urls where short_url = $1"#, shorten_url)
+            .fetch_optional(&state.db)
+            .await
+            .map_err(internal_error)?;
+        if record.is_none() {
+            shortest = Some(candidate);
+            break;
+        }
+    }
+    let Some(shortest) = shortest else {
+        return Err((
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Failed to generate short URL".to_string(),
+        ));
+    };
+    let response = ShortenerResponse { url: shortest };
     Ok(Json(response))
 }
 
@@ -41,4 +60,11 @@ fn gen_shorten_code(url: &str) -> String {
     let mut hasher = DefaultHasher::new();
     url.hash(&mut hasher);
     hasher.finish().to_string()
+}
+
+fn internal_error<E>(err: E) -> (StatusCode, String)
+where
+    E: std::error::Error,
+{
+    (StatusCode::INTERNAL_SERVER_ERROR, err.to_string())
 }
