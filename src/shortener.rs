@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::prelude::*;
 use std::sync::Arc;
 
-use crate::AppState;
+use crate::{AppState, utils::internal_error};
 
 #[derive(Deserialize, Debug)]
 pub struct ShortenerRequest {
@@ -75,11 +75,4 @@ fn gen_shorten_code(url: &str) -> String {
     let mut hasher = DefaultHasher::new();
     url.hash(&mut hasher);
     hasher.finish().to_string()
-}
-
-fn internal_error<E>(err: E) -> (StatusCode, String)
-where
-    E: std::error::Error,
-{
-    (StatusCode::INTERNAL_SERVER_ERROR, err.to_string())
 }
