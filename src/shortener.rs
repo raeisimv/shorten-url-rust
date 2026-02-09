@@ -1,6 +1,5 @@
 use axum::{Json, extract::State, http::StatusCode};
 use serde::{Deserialize, Serialize};
-use sqlx::prelude::*;
 use std::sync::Arc;
 
 use crate::{AppState, utils::internal_error};
@@ -15,15 +14,6 @@ pub struct ShortenerRequest {
 #[derive(Serialize, Debug)]
 pub struct ShortenerResponse {
     pub url: String,
-}
-
-#[derive(FromRow)]
-pub struct UrlModel {
-    pub id: i32,
-    pub short_url: String,
-    pub url: String,
-    pub tag: Option<String>,
-    pub ttl: Option<i64>,
 }
 
 pub async fn shortener_handler(
