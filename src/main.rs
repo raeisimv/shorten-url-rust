@@ -7,12 +7,14 @@ use axum::{
 use sqlx::{migrate::MigrateDatabase, postgres::PgPoolOptions};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
+use crate::utils::MyResult;
+
 mod navigator;
 mod shortener;
 mod utils;
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() -> MyResult {
     // adjust tracing and log
     let tracing_opt = tracing_subscriber::EnvFilter::try_from_default_env()
         .unwrap_or_else(|_| format!("{}=debug,tower_http=debug", env!("CARGO_CRATE_NAME")).into());
@@ -42,7 +44,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-async fn get_router() -> Result<Router, Box<dyn std::error::Error>> {
+async fn get_router() -> MyResult<Router> {
     use crate::navigator::navigator_handler;
     use crate::shortener::shortener_handler;
 
@@ -64,12 +66,12 @@ pub struct AppState {
     pub db: sqlx::PgPool,
 }
 
-async fn app_state() -> Result<AppState, Box<dyn std::error::Error>> {
+async fn app_state() -> MyResult<AppState> {
     let db = connect_to_database().await?;
     Ok(AppState { db })
 }
 
-async fn connect_to_database() -> Result<sqlx::PgPool, sqlx::Error> {
+async fn connect_to_database() -> MyResult<sqlx::PgPool, sqlx::Error> {
     let database_url = env::var("DATABASE_URL").unwrap_or_else(|_| {
         "postgres://postgres:thePassWord@localhost:5432/shorten_url".to_string()
     });
