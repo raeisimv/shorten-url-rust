@@ -14,6 +14,7 @@ pub async fn connect_to_database() -> MyResult<sqlx::PgPool, sqlx::Error> {
     if !db_exists {
         tracing::debug!("creating database ...");
         sqlx::Postgres::create_database(&database_url).await?;
+        tracing::debug!("database created");
     }
 
     // establish the pool connection
@@ -32,11 +33,12 @@ pub async fn connect_to_database() -> MyResult<sqlx::PgPool, sqlx::Error> {
     };
 
     // migrate
-    tracing::info!("migrating [{}]", &migrations_dir.to_string_lossy());
+    tracing::info!("run migrations in: {}", &migrations_dir.to_string_lossy());
     sqlx::migrate::Migrator::new(migrations_dir)
         .await?
         .run(&pool)
         .await?;
+    tracing::info!("Ok. database is up and connected");
 
     Ok(pool)
 }
