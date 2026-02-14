@@ -16,7 +16,7 @@ mod utils;
 
 #[tokio::main]
 async fn main() -> MyResult {
-    // adjust tracing and log
+    // adjust tracing and logs
     let tracing_opt = tracing_subscriber::EnvFilter::try_from_default_env()
         .unwrap_or_else(|_| format!("{}=debug,tower_http=debug", env!("CARGO_CRATE_NAME")).into());
     tracing_subscriber::registry()
@@ -53,13 +53,13 @@ async fn get_router() -> MyResult<Router> {
     let app_state = app_state().await?;
     let app_state = std::sync::Arc::new(app_state);
 
-    let app: Router = Router::new()
+    let routes = Router::new()
         .route("/", get(|| async { "hello world!" }))
         .route("/{code}", get(navigator_handler))
         .route("/shorten", post(shortener_handler))
         .with_state(app_state);
 
-    Ok(app)
+    Ok(routes)
 }
 
 #[derive(Clone)]
