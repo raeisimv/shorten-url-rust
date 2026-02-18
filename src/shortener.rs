@@ -26,7 +26,7 @@ pub async fn shortener_handler(
     let mut shortest = None;
     for i in 3..shorten_url.len() {
         let candidate = shorten_url[..i].to_string();
-        let record = sqlx::query!(r#"select id from urls where short_url = $1"#, shorten_url)
+        let record = sqlx::query!(r#"SELECT id from urls WHERE short_url = $1"#, shorten_url)
             .fetch_optional(&state.db)
             .await
             .map_err(internal_error)?;
@@ -46,7 +46,7 @@ pub async fn shortener_handler(
     sqlx::query!(
         r#"
         INSERT INTO Urls (short_url, long_url, tag, ttl)
-        values ($1, $2, $3, $4)
+        VALUES ($1, $2, $3, $4)
         "#,
         shortest,
         pyl.url,
