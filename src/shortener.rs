@@ -45,7 +45,8 @@ pub async fn shortener_handler(
     // store it
     sqlx::query!(
         r#"
-        INSERT INTO Urls (short_url, long_url, tag, ttl) values ($1, $2, $3, $4)
+        INSERT INTO Urls (short_url, long_url, tag, ttl)
+        values ($1, $2, $3, $4)
         "#,
         shortest,
         pyl.url,
